@@ -1,0 +1,10 @@
+D:\vs\projects\PressToVideo\PressToVideo\bin\Debug\PressToVideo.exe.config
+D:\vs\projects\PressToVideo\PressToVideo\bin\Debug\PressToVideo.exe
+D:\vs\projects\PressToVideo\PressToVideo\bin\Debug\PressToVideo.pdb
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.csproj.AssemblyReference.cache
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.Form1.resources
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.Properties.Resources.resources
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.csproj.GenerateResource.cache
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.csproj.CoreCompileInputs.cache
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.exe
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.pdb
