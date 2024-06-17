@@ -5,11 +5,15 @@ using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Application = Microsoft.Office.Interop.PowerPoint.Application;
 
 namespace PressToVideo
@@ -19,6 +23,7 @@ namespace PressToVideo
         string filePath;
         string ProjectName;
         string programPath = Directory.GetCurrentDirectory();
+        List<Voice> voices;
         public Form1()
         {
             InitializeComponent();
@@ -76,7 +81,67 @@ namespace PressToVideo
             return PresTexts;
         }
 
+        private async void GetVoices()
+        {
+            //string apiKey = "YOUR_API_KEY"; // Replace with your actual API key
+            string url = "https://api.elevenlabs.io/v1/voices";
+
+            using (var client = new HttpClient())
+            {
+                //client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+
+                var response = await client.GetAsync(url);
+                if (response.IsSuccessStatusCode)
+                {
+                    var content = await response.Content.ReadAsStringAsync();
+                    var voicesData = JObject.Parse(content);
+
+                    var voicesD = new List<Voice>();
+
+                    foreach(var voice in voicesData["voices"])
+                    {
+                        voicesD.Add(new Voice()
+                        {
+                            voice_id = voice["voice_id"].ToString(),
+                            name = voice["name"].ToString()
+                        });
+                    }
+
+                    voices = voicesD.OrderBy(x => x.name).ToList();
+
+                    comboBoxVoices.DataSource = voices;
+                    comboBoxVoices.DisplayMember = "name";
+                }
+            }
+        }
+
+        public class Voice
+        {
+            public string voice_id {  get; set; }
+            public string name { get; set; }
+        }
+
         private void Form1_DragDrop(object sender, DragEventArgs e)
+        {
+            
+        }
+
+        private void Form1_DragEnter(object sender, DragEventArgs e)
+        {
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            try
+            {
+                GetVoices();
+            } catch
+            {
+
+            }
+        }
+
+        private void panel1_DragDrop(object sender, DragEventArgs e)
         {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             filePath = files[0];
@@ -89,7 +154,7 @@ namespace PressToVideo
             MessageBox.Show("Fineshed!!!");
         }
 
-        private void Form1_DragEnter(object sender, DragEventArgs e)
+        private void panel1_DragEnter(object sender, DragEventArgs e)
         {
             e.Effect = DragDropEffects.Copy;
         }

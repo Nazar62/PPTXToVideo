@@ -8,3 +8,6 @@ D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.csproj.GenerateR
 D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.csproj.CoreCompileInputs.cache
 D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.exe
 D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.pdb
+D:\vs\projects\PressToVideo\PressToVideo\bin\Debug\Newtonsoft.Json.dll
+D:\vs\projects\PressToVideo\PressToVideo\bin\Debug\Newtonsoft.Json.xml
+D:\vs\projects\PressToVideo\PressToVideo\obj\Debug\PressToVideo.csproj.CopyComplete
