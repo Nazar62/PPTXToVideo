@@ -32,7 +32,15 @@
             this.label1 = new System.Windows.Forms.Label();
             this.comboBoxVoices = new System.Windows.Forms.ComboBox();
             this.label2 = new System.Windows.Forms.Label();
+            this.buttonStartConvert = new System.Windows.Forms.Button();
+            this.buttonOpenInExplorer = new System.Windows.Forms.Button();
+            this.textBoxSlideText = new System.Windows.Forms.TextBox();
+            this.panelTextEdit = new System.Windows.Forms.Panel();
+            this.buttonNext = new System.Windows.Forms.Button();
+            this.buttonSkipAll = new System.Windows.Forms.Button();
+            this.labelCount = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
+            this.panelTextEdit.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -64,6 +72,7 @@
             this.comboBoxVoices.Name = "comboBoxVoices";
             this.comboBoxVoices.Size = new System.Drawing.Size(121, 21);
             this.comboBoxVoices.TabIndex = 1;
+            this.comboBoxVoices.SelectedIndexChanged += new System.EventHandler(this.comboBoxVoices_SelectedIndexChanged);
             // 
             // label2
             // 
@@ -74,12 +83,95 @@
             this.label2.TabIndex = 2;
             this.label2.Text = "Voices";
             // 
+            // buttonStartConvert
+            // 
+            this.buttonStartConvert.Location = new System.Drawing.Point(12, 74);
+            this.buttonStartConvert.Name = "buttonStartConvert";
+            this.buttonStartConvert.Size = new System.Drawing.Size(98, 23);
+            this.buttonStartConvert.TabIndex = 3;
+            this.buttonStartConvert.Text = "Start convert";
+            this.buttonStartConvert.UseVisualStyleBackColor = true;
+            this.buttonStartConvert.Click += new System.EventHandler(this.buttonStartConvert_Click);
+            // 
+            // buttonOpenInExplorer
+            // 
+            this.buttonOpenInExplorer.Location = new System.Drawing.Point(13, 104);
+            this.buttonOpenInExplorer.Name = "buttonOpenInExplorer";
+            this.buttonOpenInExplorer.Size = new System.Drawing.Size(97, 23);
+            this.buttonOpenInExplorer.TabIndex = 4;
+            this.buttonOpenInExplorer.Text = "Open in explorer";
+            this.buttonOpenInExplorer.UseVisualStyleBackColor = true;
+            this.buttonOpenInExplorer.Visible = false;
+            this.buttonOpenInExplorer.Click += new System.EventHandler(this.buttonOpenInExplorer_Click);
+            // 
+            // textBoxSlideText
+            // 
+            this.textBoxSlideText.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.textBoxSlideText.Location = new System.Drawing.Point(0, 0);
+            this.textBoxSlideText.Multiline = true;
+            this.textBoxSlideText.Name = "textBoxSlideText";
+            this.textBoxSlideText.Size = new System.Drawing.Size(609, 222);
+            this.textBoxSlideText.TabIndex = 5;
+            // 
+            // panelTextEdit
+            // 
+            this.panelTextEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.panelTextEdit.Controls.Add(this.labelCount);
+            this.panelTextEdit.Controls.Add(this.buttonSkipAll);
+            this.panelTextEdit.Controls.Add(this.buttonNext);
+            this.panelTextEdit.Controls.Add(this.textBoxSlideText);
+            this.panelTextEdit.Location = new System.Drawing.Point(186, 3);
+            this.panelTextEdit.Name = "panelTextEdit";
+            this.panelTextEdit.Size = new System.Drawing.Size(609, 257);
+            this.panelTextEdit.TabIndex = 6;
+            this.panelTextEdit.Visible = false;
+            // 
+            // buttonNext
+            // 
+            this.buttonNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonNext.Location = new System.Drawing.Point(4, 230);
+            this.buttonNext.Name = "buttonNext";
+            this.buttonNext.Size = new System.Drawing.Size(75, 23);
+            this.buttonNext.TabIndex = 7;
+            this.buttonNext.Text = "Next";
+            this.buttonNext.UseVisualStyleBackColor = true;
+            this.buttonNext.Click += new System.EventHandler(this.buttonNext_Click);
+            // 
+            // buttonSkipAll
+            // 
+            this.buttonSkipAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonSkipAll.Location = new System.Drawing.Point(85, 230);
+            this.buttonSkipAll.Name = "buttonSkipAll";
+            this.buttonSkipAll.Size = new System.Drawing.Size(75, 23);
+            this.buttonSkipAll.TabIndex = 8;
+            this.buttonSkipAll.Text = "Skip all";
+            this.buttonSkipAll.UseVisualStyleBackColor = true;
+            this.buttonSkipAll.Click += new System.EventHandler(this.buttonSkipAll_Click);
+            // 
+            // labelCount
+            // 
+            this.labelCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.labelCount.AutoSize = true;
+            this.labelCount.Location = new System.Drawing.Point(166, 235);
+            this.labelCount.Name = "labelCount";
+            this.labelCount.Size = new System.Drawing.Size(35, 13);
+            this.labelCount.TabIndex = 9;
+            this.labelCount.Text = "Count";
+            this.labelCount.Click += new System.EventHandler(this.labelCount_Click);
+            // 
             // Form1
             // 
             this.AllowDrop = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.panelTextEdit);
+            this.Controls.Add(this.buttonOpenInExplorer);
+            this.Controls.Add(this.buttonStartConvert);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.comboBoxVoices);
             this.Controls.Add(this.panel1);
@@ -89,6 +181,8 @@
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
             this.panel1.ResumeLayout(false);
+            this.panelTextEdit.ResumeLayout(false);
+            this.panelTextEdit.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -100,6 +194,13 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBoxVoices;
         private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Button buttonStartConvert;
+        private System.Windows.Forms.Button buttonOpenInExplorer;
+        private System.Windows.Forms.TextBox textBoxSlideText;
+        private System.Windows.Forms.Panel panelTextEdit;
+        private System.Windows.Forms.Button buttonSkipAll;
+        private System.Windows.Forms.Button buttonNext;
+        private System.Windows.Forms.Label labelCount;
     }
 }
 
