@@ -1,21 +1,20 @@
-﻿using System;
+﻿using Microsoft.Office.Core;
+using Microsoft.Office.Interop.PowerPoint;
+using NAudio.Wave;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Office.Core;
-using Microsoft.Office.Interop.PowerPoint;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Application = Microsoft.Office.Interop.PowerPoint.Application;
+using Shape = Microsoft.Office.Interop.PowerPoint.Shape;
+using Shapes = Microsoft.Office.Interop.PowerPoint.Shapes;
 
 namespace PressToVideo
 {
@@ -29,17 +28,64 @@ namespace PressToVideo
         int slidesCount;
         int txtsCount;
         List<string> slidesText = new List<string>();
+        Settings appSettings;
+        private const int CHUNK_SIZE = 1024;
+        private static string XI_API_KEY;
         public Form1()
         {
             InitializeComponent();
+            if(File.Exists($"{programPath}/settings.json"))
+            {
+                appSettings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{programPath}/settings.json"));
+                textBoxElevenLabsAPIKey.Text = appSettings.ElevenLabsAPIKey;
+            }
         }
 
-        private const int CHUNK_SIZE = 1024; // Size of chunks to read/write at a time
-        private static readonly string XI_API_KEY = "d022dc9bd6e97b18bbc7bca0fbf6b1d7"; // Your API key for authentication
-        //private static readonly string VOICE_ID = "21m00Tcm4TlvDq8ikWAM"; // ID of the voice model to use
-        //private static readonly string TEXT_TO_SPEAK = "Привіт це Eleven labs API"; // Text you want to convert to speech
-        //private static readonly string OUTPUT_PATH = "output.mp3"; // Path to save the output audio file
 
+        #region Narration
+        private void AddNarration(string wavFolderPath)
+        {
+            string presentationPath = $"{programPath}/{ProjectName}/press.pptx";
+
+            if(File.Exists(presentationPath))
+            {
+                File.Delete(presentationPath);
+            }
+
+            File.Copy(filePath, presentationPath);
+
+            Application application = new Application();
+            Presentation presentation = application.Presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+
+            for(int i = 0; i < presentation.Slides.Count; i++)
+            {
+                if (slidesText[i].Trim() != string.Empty)
+                {
+                    Slide slide = presentation.Slides[i + 1];
+                    Shapes shapes = slide.Shapes;
+                    string wavFilePath = wavFolderPath.Replace('/', '\\') + $"{i}.mp3";
+                    Shape narrationShape = shapes.AddMediaObject2(wavFilePath, MsoTriState.msoFalse, MsoTriState.msoTrue, 0, 0);
+                    // Set the playback settings for the audio
+                    narrationShape.AnimationSettings.PlaySettings.PlayOnEntry = MsoTriState.msoTrue;
+                    narrationShape.AnimationSettings.PlaySettings.HideWhileNotPlaying = MsoTriState.msoTrue;
+
+                    //set durration
+                    AudioFileReader wf = new AudioFileReader(wavFilePath);
+                    var wavDuration = (long)wf.TotalTime.TotalSeconds;
+                    slide.SlideShowTransition.AdvanceOnTime = MsoTriState.msoTrue;
+                    slide.SlideShowTransition.AdvanceTime = wavDuration;
+                }
+            }
+        }
+
+        private void ExportToMp4(string outputPath)
+        {
+            Application application = new Application();
+            Presentation pptPresentation = application.Presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+            pptPresentation.SaveAs(outputPath, PpSaveAsFileType.ppSaveAsMP4, MsoTriState.msoCTrue);
+        }
+
+        #region TTS
         private async Task TTSAll()
         {
             if(!Directory.Exists($"{programPath}/{ProjectName}/wavs/"))
@@ -50,7 +96,7 @@ namespace PressToVideo
             {
                 if (slidesText[i].Trim() != string.Empty)
                 {
-                    await TTS(slidesText[i], $"{programPath}/{ProjectName}/wavs/{i}.wav");
+                    await TTS(slidesText[i], $"{programPath}/{ProjectName}/wavs/{i}.mp3");
                 }
             }
         }
@@ -108,7 +154,19 @@ namespace PressToVideo
                 // Print the error message if the request was not successful
                 MessageBox.Show(await response.Content.ReadAsStringAsync());
             }
-            Task.Delay(1000);
+            //Task.Delay(1000);
+        }
+
+        #endregion
+        #endregion
+
+        private async void ContinueConvert()
+        {
+            await TTSAll();
+            MessageBox.Show("All slides narrated");
+            AddNarration($"{programPath}/{ProjectName}/wavs/");
+            ExportToMp4($"{programPath}/{ProjectName}/press.mp4");
+            MessageBox.Show("Finished");
         }
 
         private void WriteTextToFiles(List<string> text, string path)
@@ -149,7 +207,7 @@ namespace PressToVideo
                         if (shape.TextFrame.HasText == MsoTriState.msoTrue)
                         {
                             var textRange = shape.TextFrame.TextRange;
-                            text += textRange.Text + "\n"; // Or update a control on your form
+                            text += textRange.Text + ".\n"; // Or update a control on your form
                         }
                     }
                 }
@@ -196,14 +254,19 @@ namespace PressToVideo
 
                     comboBoxVoices.DataSource = voices;
                     comboBoxVoices.DisplayMember = "name";
+
+                    if (File.Exists($"{programPath}/settings.json"))
+                    {
+                        if (voices.Any(x => x.name == appSettings.SelectedVoice.name))
+                        {
+                            var voice = voices.Where(x => x.name == appSettings.SelectedVoice.name).FirstOrDefault();
+                            var voiceIndex = voices.IndexOf(voice);
+                            comboBoxVoices.SelectedIndex = voiceIndex;
+                            //comboBoxVoices.SelectedItem = appSettings.SelectedVoice;
+                        }
+                    }
                 }
             }
-        }
-
-        public class Voice
-        {
-            public string voice_id {  get; set; }
-            public string name { get; set; }
         }
 
         private void Form1_DragDrop(object sender, DragEventArgs e)
@@ -238,6 +301,7 @@ namespace PressToVideo
             }
 
             buttonOpenInExplorer.Visible = true;
+            buttonStartConvert.Visible = true;
         }
 
         private void panel1_DragEnter(object sender, DragEventArgs e)
@@ -264,7 +328,11 @@ namespace PressToVideo
                 panelTextEdit.Visible = true;
                 labelCount.Text = $"1/{slidesCount}";
                 textBoxSlideText.Text = slidesText[0];
+            } else
+            {
+                ContinueConvert();
             }
+
 
             //MessageBox.Show("Fineshed!!!");
         }
@@ -294,7 +362,7 @@ namespace PressToVideo
                 panelTextEdit.Visible = false;
                 MessageBox.Show("All Text Edited");
                 currentTxt = 0;
-                TTSAll();
+                ContinueConvert();
             }
         }
 
@@ -307,7 +375,24 @@ namespace PressToVideo
         {
             panelTextEdit.Visible = false;
             currentTxt = 0;
-            TTSAll();
+            ContinueConvert();
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Settings settings = new Settings()
+            {
+                ElevenLabsAPIKey = textBoxElevenLabsAPIKey.Text,
+                SelectedVoice = selectedVoice
+            };
+
+            var json = JsonConvert.SerializeObject(settings);
+            File.WriteAllText($"{programPath}/settings.json", json);
+        }
+
+        private void textBoxElevenLabsAPIKey_TextChanged(object sender, EventArgs e)
+        {
+            XI_API_KEY = textBoxElevenLabsAPIKey.Text;
         }
     }
 }

@@ -36,9 +36,11 @@
             this.buttonOpenInExplorer = new System.Windows.Forms.Button();
             this.textBoxSlideText = new System.Windows.Forms.TextBox();
             this.panelTextEdit = new System.Windows.Forms.Panel();
-            this.buttonNext = new System.Windows.Forms.Button();
-            this.buttonSkipAll = new System.Windows.Forms.Button();
             this.labelCount = new System.Windows.Forms.Label();
+            this.buttonSkipAll = new System.Windows.Forms.Button();
+            this.buttonNext = new System.Windows.Forms.Button();
+            this.textBoxElevenLabsAPIKey = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.panel1.SuspendLayout();
             this.panelTextEdit.SuspendLayout();
             this.SuspendLayout();
@@ -91,6 +93,7 @@
             this.buttonStartConvert.TabIndex = 3;
             this.buttonStartConvert.Text = "Start convert";
             this.buttonStartConvert.UseVisualStyleBackColor = true;
+            this.buttonStartConvert.Visible = false;
             this.buttonStartConvert.Click += new System.EventHandler(this.buttonStartConvert_Click);
             // 
             // buttonOpenInExplorer
@@ -130,16 +133,16 @@
             this.panelTextEdit.TabIndex = 6;
             this.panelTextEdit.Visible = false;
             // 
-            // buttonNext
+            // labelCount
             // 
-            this.buttonNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.buttonNext.Location = new System.Drawing.Point(4, 230);
-            this.buttonNext.Name = "buttonNext";
-            this.buttonNext.Size = new System.Drawing.Size(75, 23);
-            this.buttonNext.TabIndex = 7;
-            this.buttonNext.Text = "Next";
-            this.buttonNext.UseVisualStyleBackColor = true;
-            this.buttonNext.Click += new System.EventHandler(this.buttonNext_Click);
+            this.labelCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.labelCount.AutoSize = true;
+            this.labelCount.Location = new System.Drawing.Point(166, 235);
+            this.labelCount.Name = "labelCount";
+            this.labelCount.Size = new System.Drawing.Size(35, 13);
+            this.labelCount.TabIndex = 9;
+            this.labelCount.Text = "Count";
+            this.labelCount.Click += new System.EventHandler(this.labelCount_Click);
             // 
             // buttonSkipAll
             // 
@@ -152,16 +155,33 @@
             this.buttonSkipAll.UseVisualStyleBackColor = true;
             this.buttonSkipAll.Click += new System.EventHandler(this.buttonSkipAll_Click);
             // 
-            // labelCount
+            // buttonNext
             // 
-            this.labelCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.labelCount.AutoSize = true;
-            this.labelCount.Location = new System.Drawing.Point(166, 235);
-            this.labelCount.Name = "labelCount";
-            this.labelCount.Size = new System.Drawing.Size(35, 13);
-            this.labelCount.TabIndex = 9;
-            this.labelCount.Text = "Count";
-            this.labelCount.Click += new System.EventHandler(this.labelCount_Click);
+            this.buttonNext.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.buttonNext.Location = new System.Drawing.Point(4, 230);
+            this.buttonNext.Name = "buttonNext";
+            this.buttonNext.Size = new System.Drawing.Size(75, 23);
+            this.buttonNext.TabIndex = 7;
+            this.buttonNext.Text = "Next";
+            this.buttonNext.UseVisualStyleBackColor = true;
+            this.buttonNext.Click += new System.EventHandler(this.buttonNext_Click);
+            // 
+            // textBoxElevenLabsAPIKey
+            // 
+            this.textBoxElevenLabsAPIKey.Location = new System.Drawing.Point(12, 158);
+            this.textBoxElevenLabsAPIKey.Name = "textBoxElevenLabsAPIKey";
+            this.textBoxElevenLabsAPIKey.Size = new System.Drawing.Size(168, 20);
+            this.textBoxElevenLabsAPIKey.TabIndex = 7;
+            this.textBoxElevenLabsAPIKey.TextChanged += new System.EventHandler(this.textBoxElevenLabsAPIKey_TextChanged);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(12, 139);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(103, 13);
+            this.label3.TabIndex = 8;
+            this.label3.Text = "ElevenLabs API key";
             // 
             // Form1
             // 
@@ -169,6 +189,8 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.textBoxElevenLabsAPIKey);
             this.Controls.Add(this.panelTextEdit);
             this.Controls.Add(this.buttonOpenInExplorer);
             this.Controls.Add(this.buttonStartConvert);
@@ -177,6 +199,7 @@
             this.Controls.Add(this.panel1);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             this.Load += new System.EventHandler(this.Form1_Load);
             this.DragDrop += new System.Windows.Forms.DragEventHandler(this.Form1_DragDrop);
             this.DragEnter += new System.Windows.Forms.DragEventHandler(this.Form1_DragEnter);
@@ -201,6 +224,8 @@
         private System.Windows.Forms.Button buttonSkipAll;
         private System.Windows.Forms.Button buttonNext;
         private System.Windows.Forms.Label labelCount;
+        private System.Windows.Forms.TextBox textBoxElevenLabsAPIKey;
+        private System.Windows.Forms.Label label3;
     }
 }
 
