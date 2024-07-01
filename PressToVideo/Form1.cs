@@ -55,7 +55,8 @@ namespace PressToVideo
             File.Copy(filePath, presentationPath);
 
             Application application = new Application();
-            Presentation presentation = application.Presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+            application.Visible = MsoTriState.msoFalse;
+            Presentation presentation = application.Presentations.Open(filePath);
 
             for(int i = 0; i < presentation.Slides.Count; i++)
             {
@@ -76,6 +77,8 @@ namespace PressToVideo
                     slide.SlideShowTransition.AdvanceTime = wavDuration;
                 }
             }
+            presentation.Close();
+            application.Quit();
         }
 
         private void ExportToMp4(string outputPath)
@@ -83,6 +86,8 @@ namespace PressToVideo
             Application application = new Application();
             Presentation pptPresentation = application.Presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
             pptPresentation.SaveAs(outputPath, PpSaveAsFileType.ppSaveAsMP4, MsoTriState.msoCTrue);
+            pptPresentation.Close();
+            application.Quit();
         }
 
         #region TTS
@@ -200,7 +205,7 @@ namespace PressToVideo
             foreach (Slide slide in pptPresentation.Slides)
             {
                 string text = "";
-                foreach (Microsoft.Office.Interop.PowerPoint.Shape shape in slide.Shapes)
+                foreach (Shape shape in slide.Shapes)
                 {
                     if (shape.HasTextFrame == MsoTriState.msoTrue)
                     {
@@ -393,6 +398,11 @@ namespace PressToVideo
         private void textBoxElevenLabsAPIKey_TextChanged(object sender, EventArgs e)
         {
             XI_API_KEY = textBoxElevenLabsAPIKey.Text;
+        }
+
+        private void textBoxSlideText_TextChanged(object sender, EventArgs e)
+        {
+
         }
     }
 }

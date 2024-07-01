@@ -117,6 +117,7 @@
             this.textBoxSlideText.Name = "textBoxSlideText";
             this.textBoxSlideText.Size = new System.Drawing.Size(609, 222);
             this.textBoxSlideText.TabIndex = 5;
+            this.textBoxSlideText.TextChanged += new System.EventHandler(this.textBoxSlideText_TextChanged);
             // 
             // panelTextEdit
             // 

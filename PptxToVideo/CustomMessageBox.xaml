@@ -1,0 +1,104 @@
+﻿<Window x:Class="PptxToVideo.CustomMessageBox"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PptxToVideo"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        Background="Transparent"
+        mc:Ignorable="d"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        AllowsTransparency="True"
+        Title="Message" Height="220" Width="500">
+    <Grid>
+        <Border Background="#272530"
+            CornerRadius="10">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
+                    <RowDefinition/>
+                </Grid.RowDefinitions>
+
+                <DockPanel Background="#1F1D28" LastChildFill="False" DockPanel.Dock="Top" MouseDown="DockPanel_MouseDown">
+                    <Button
+                        IsEnabled="{Binding DataContext.ControlsEnabled, RelativeSource={RelativeSource FindAncestor, AncestorType=Window}}"
+                        Style="{StaticResource MaterialDesignRaisedDarkButton}"
+                        ToolTip="Close Program"
+                        Height="45"
+                        Width="45"
+                        Grid.Column="1"
+                        DockPanel.Dock="Right"
+                        HorizontalAlignment="Right"
+                        Margin="2, 2, 8, 2"
+                        Background="Transparent"
+                        BorderThickness="0"
+                        MouseEnter="CloseBtn_MouseEnter"
+                        MouseLeave="CloseBtn_MouseLeave"
+                        Click="CloseBtn_Click"
+                        x:Name="CloseBtn">
+                        <materialDesign:PackIcon 
+                            HorizontalAlignment="Center" 
+                            Foreground="White" 
+                            Kind="Close" 
+                            Height="20" 
+                            Width="20"/>
+                    </Button>
+                </DockPanel>
+                <TextBlock Text="hi"
+                           Foreground="#CECECE"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center"
+                           FontSize="22"
+                           x:Name="txtTitle"/>
+                <DockPanel Grid.Row="1" Margin="10" LastChildFill="False">
+                    <TextBlock Text="hi"
+                               Foreground="#CECECE"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               FontSize="18"
+                               Margin="5"
+                               x:Name="txtMessage"
+                               DockPanel.Dock="Top"/>
+                    <Grid Grid.Row="1" Margin="0,20,0,5" DockPanel.Dock="Bottom">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Button x:Name="btnOk" 
+                                Click="btnOk_Click" 
+                                Grid.Column="1" 
+                                Style="{StaticResource MaterialDesignRaisedButton}" 
+                                Margin="5" 
+                                Width="100" 
+                                Content="OK" 
+                                ToolTip="Ok"/>
+                        <Button x:Name="btnCancel" 
+                                Click="btnCancel_Click"
+                                Grid.Column="2" 
+                                Style="{StaticResource MaterialDesignRaisedButton}" 
+                                Margin="5" 
+                                Width="100" 
+                                Content="Cancel" 
+                                ToolTip="Cancel"/>
+                        <Button x:Name="btnYes" 
+                                Click="btnYes_Click" 
+                                Grid.Column="1" 
+                                Style="{StaticResource MaterialDesignRaisedButton}" Margin="5" Width="100" Content="Yes" ToolTip="Yes"/>
+                        <Button x:Name="btnNo" 
+                                Click="btnNo_Click"
+                                Grid.Column="2" 
+                                Style="{StaticResource MaterialDesignRaisedButton}" 
+                                Margin="5" 
+                                Width="100" 
+                                Content="No" 
+                                ToolTip="No"/>
+                    </Grid>
+                </DockPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

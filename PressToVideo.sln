@@ -5,6 +5,8 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PressToVideo", "PressToVideo\PressToVideo.csproj", "{678A472F-4C06-4ED6-9CB7-837D5BE88B47}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PptxToVideo", "PptxToVideo\PptxToVideo.csproj", "{6534546D-EC72-4F2F-A283-E62C7E3123C7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{678A472F-4C06-4ED6-9CB7-837D5BE88B47}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{678A472F-4C06-4ED6-9CB7-837D5BE88B47}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{678A472F-4C06-4ED6-9CB7-837D5BE88B47}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6534546D-EC72-4F2F-A283-E62C7E3123C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6534546D-EC72-4F2F-A283-E62C7E3123C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6534546D-EC72-4F2F-A283-E62C7E3123C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6534546D-EC72-4F2F-A283-E62C7E3123C7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
