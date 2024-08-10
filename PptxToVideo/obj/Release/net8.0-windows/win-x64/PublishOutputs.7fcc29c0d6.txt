@@ -1,0 +1,2 @@
+D:\vs\projects\PressToVideo\PptxToVideo\bin\Release\net8.0-windows\publish\win-x64\PptxToVideo.pdb
+D:\vs\projects\PressToVideo\PptxToVideo\bin\Release\net8.0-windows\publish\win-x64\PptxToVideo.exe

@@ -1,10 +1,12 @@
 ﻿using Microsoft.Office.Core;
 using Microsoft.Office.Interop.PowerPoint;
+using Microsoft.Win32;
 using NAudio.Wave;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.IO;
 using System.Net.Http;
+using System.Reflection.Metadata.Ecma335;
 using System.Security.AccessControl;
 using System.Text;
 using System.Windows;
@@ -185,6 +187,9 @@ namespace PptxToVideo
                     FileData.Text = fileData;
                     DropLabel.Visibility = Visibility.Hidden;
                     DragRectangle.Visibility = Visibility.Hidden;
+                    progressBar.Visibility = Visibility.Visible;
+                    progressLabel.Visibility = Visibility.Visible;
+                    progressBar.Value = 0;
                     ProjectName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
                     if (!Directory.Exists($"{programPath}/{ProjectName}/"))
@@ -198,6 +203,35 @@ namespace PptxToVideo
             }
         }
 
+        private void DragRectangle_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            OpenFileDialog fileDialog = new OpenFileDialog();
+            fileDialog.Filter = "PowerPoint files (*.pptx)|*.pptx";
+            fileDialog.ShowDialog();
+            string path = fileDialog.FileName;
+                FileInfo fileInfo = new FileInfo(path);
+                string fileName = fileInfo.Name;
+                filePath = path;
+                string fileData = $"File Name: {fileInfo.Name.Split('.')[0]} \n" +
+                $"Size (bytes): {fileInfo.Length} \n" +
+                $"Created: {fileInfo.CreationTime} \n" +
+                $"Last Edited: {fileInfo.LastWriteTime}  \n" +
+                $"Owner: {GetFileOwner(fileDialog.FileName).Split('\\')[1]}";
+
+                FileData.Text = fileData;
+                DropLabel.Visibility = Visibility.Hidden;
+                DragRectangle.Visibility = Visibility.Hidden;
+            progressBar.Visibility = Visibility.Visible;
+            progressLabel.Visibility = Visibility.Visible;
+            progressBar.Value = 0;
+            ProjectName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+
+                if (!Directory.Exists($"{programPath}/{ProjectName}/"))
+                {
+                    Directory.CreateDirectory($"{programPath}/{ProjectName}/");
+                }
+        }
+
         static string GetFileOwner(string path)
         {
             FileSecurity fileSecurity = new FileSecurity(path, AccessControlSections.Owner);
@@ -207,22 +241,37 @@ namespace PptxToVideo
 
         private void buttonStartConvert_Click(object sender, RoutedEventArgs e)
         {
-            var texts = GetTextFromPressentation(filePath);
-
-            //WriteTextToFiles(texts, $"{programPath}/{ProjectName}/txt/");
-
-            var choice = new CustomMessageBox("Want to check the correctness of the text for voice-over?", "Question", CustomMessageBox.MessageButtons.YesNo).ShowDialog();
-
-            if (choice.Value == true)
+            //var isApiCorrect = await IsApiKeyCorrect(XI_API_KEY);
+            if (filePath == null)
             {
-                //System.Diagnostics.Process.Start("explorer.exe", "/select," + $"{programPath}/{ProjectName}/txt/".Replace('/', '\\'));
-                panelTextEdit.Visibility = Visibility.Visible;
-                labelCount.Text = $"1/{slidesCount}";
-                textBoxSlideText.Text = slidesText[0];
-            }
-            else
+                new CustomMessageBox("No File selected! Please drag and drop file to Drag and Drop arrea in programm", "No file").ShowDialog();
+            } else if(textBoxElevenLabsAPIKey.Text.Trim() == "")
             {
-                ContinueConvert();
+                new CustomMessageBox("Api key is null or whitespace", "Api key not correct").ShowDialog();
+            } else if (!(IsApiKeyCorrect(XI_API_KEY).Result))
+            {
+                new CustomMessageBox("Api key is uncorrect", "Api key not correct").ShowDialog();
+            } else
+            {
+                progressLabel.Content = "Getting Text For Voice-Over";
+                var texts = GetTextFromPressentation(filePath);
+                progressBar.Value = 20;
+                //WriteTextToFiles(texts, $"{programPath}/{ProjectName}/txt/");
+
+                var choice = new CustomMessageBox("Want to check the correctness of the text for voice-over?", "Question", CustomMessageBox.MessageButtons.YesNo).ShowDialog();
+
+                if (choice.Value == true)
+                {
+                    //System.Diagnostics.Process.Start("explorer.exe", "/select," + $"{programPath}/{ProjectName}/txt/".Replace('/', '\\'));
+                    progressLabel.Content = "Editing Text For Voice-Over";
+                    panelTextEdit.Visibility = Visibility.Visible;
+                    labelCount.Text = $"1/{slidesCount}";
+                    textBoxSlideText.Text = slidesText[0];
+                }
+                else
+                {
+                    ContinueConvert();
+                }
             }
         }
 
@@ -240,7 +289,8 @@ namespace PptxToVideo
             else
             {
                 panelTextEdit.Visibility = Visibility.Hidden;
-                new CustomMessageBox("All Text Edited").ShowDialog();
+                progressLabel.Content = "All Text Edited";
+                progressBar.Value += 20;
                 currentTxt = 0;
                 ContinueConvert();
             }
@@ -294,11 +344,51 @@ namespace PptxToVideo
         }
         private async void ContinueConvert()
         {
-            await TTSAll();
-            new CustomMessageBox("All slides narrated").ShowDialog();
-            AddNarration($"{programPath}/{ProjectName}/wavs/");
-            ExportToMp4($"{programPath}/{ProjectName}/press.mp4");
-            new CustomMessageBox("Finished").ShowDialog();
+            progressLabel.Content = "Converting text to speech";
+            var responce = await TTSAll();
+            progressBar.Value += 20;
+            if (responce)
+            {
+                progressLabel.Content = "Adding Narration";
+                AddNarration($"{programPath}/{ProjectName}/wavs/");
+                progressBar.Value += 20;
+                progressLabel.Content = "Exporting to MP4";
+                var output = await ExportToMp4($"{programPath}/{ProjectName}/press.mp4");
+                progressBar.Value += 20;
+                progressLabel.Content = "Finished";
+                var result = new CustomMessageBox("Finished! \nWant to open in explorer?", "Question", CustomMessageBox.MessageButtons.YesNo).ShowDialog();
+                if (result.Value == true)
+                {
+                    System.Diagnostics.Process.Start("explorer.exe", "/select," + $"{programPath}/{ProjectName}/".Replace('/', '\\'));
+                }
+            } else
+            {
+                new CustomMessageBox("Error while narrate slides").ShowDialog();
+            }
+        }
+
+        async Task<bool> IsApiKeyCorrect(string apiKey)
+        {
+            // Construct the URL for the Text-to-Speech API request
+            string ttsUrl = $"https://api.elevenlabs.io/v1/user";
+
+            // Set up headers for the API request, including the API key for authentication
+            var client = new HttpClient();
+            client.DefaultRequestHeaders.Accept.Clear();
+            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+            client.DefaultRequestHeaders.Add("xi-api-key", apiKey);
+
+            var response = client.GetAsync(ttsUrl).Result;
+
+            // Check if the request was successful
+            if (response.IsSuccessStatusCode)
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
 
         #region Narration
@@ -347,16 +437,24 @@ namespace PptxToVideo
             application.Quit();
         }
 
-        private void ExportToMp4(string outputPath)
+        private async Task<bool> ExportToMp4(string outputPath)
         {
-            string presentationPath = $"{programPath}/{ProjectName}/press.pptx";
-            Application application = new Application();
-            Presentation pptPresentation = application.Presentations.Open(presentationPath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-            pptPresentation.SaveAs(outputPath, PpSaveAsFileType.ppSaveAsMP4, MsoTriState.msoCTrue);
+            try
+            {
+                string presentationPath = $"{programPath}/{ProjectName}/press.pptx";
+                Application application = new Application();
+                Presentation pptPresentation = application.Presentations.Open(presentationPath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
+                pptPresentation.SaveAs(outputPath, PpSaveAsFileType.ppSaveAsMP4, MsoTriState.msoCTrue);
+                return true;
+            } catch(Exception ex)
+            {
+                new CustomMessageBox($"Error export. {ex}").ShowDialog();
+                return false;
+            }
         }
 
         #region TTS
-        private async Task TTSAll()
+        private async Task<bool> TTSAll()
         {
             if (!Directory.Exists($"{programPath}/{ProjectName}/wavs/"))
             {
@@ -366,12 +464,18 @@ namespace PptxToVideo
             {
                 if (slidesText[i].Trim() != string.Empty)
                 {
-                    await TTS(slidesText[i], $"{programPath}/{ProjectName}/wavs/{i}.mp3");
+                    var responce = await TTS(slidesText[i], $"{programPath}/{ProjectName}/wavs/{i}.mp3");
+                    if(responce == false)
+                    {
+                        return false;
+                        break;
+                    }
                 }
             }
+            return true;
         }
 
-        async Task TTS(string text, string outputPath)
+        async Task<bool> TTS(string text, string outputPath)
         {
             // Construct the URL for the Text-to-Speech API request
             string ttsUrl = $"https://api.elevenlabs.io/v1/text-to-speech/{selectedVoice.voice_id}/stream";
@@ -416,6 +520,7 @@ namespace PptxToVideo
                         fileStream.Write(buffer, 0, read);
                     }
                 }
+                return true;
                 // Inform the user of success
                 //Console.WriteLine("Audio stream saved successfully.");
             }
@@ -423,6 +528,7 @@ namespace PptxToVideo
             {
                 // Print the error message if the request was not successful
                 new CustomMessageBox(await response.Content.ReadAsStringAsync()).ShowDialog();
+                return false;
             }
             //Task.Delay(1000);
         }

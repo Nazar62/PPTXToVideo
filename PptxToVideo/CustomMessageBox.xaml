@@ -9,10 +9,11 @@
         mc:Ignorable="d"
         WindowStyle="None"
         ResizeMode="NoResize"
+        WindowStartupLocation="CenterScreen"
         AllowsTransparency="True"
         Title="Message" Height="220" Width="500">
     <Grid>
-        <Border Background="#272530"
+        <Border Background="#2B283B"
             CornerRadius="10">
             <Grid>
                 <Grid.RowDefinitions>
@@ -58,6 +59,7 @@
                                HorizontalAlignment="Center"
                                FontSize="18"
                                Margin="5"
+                               TextWrapping="Wrap"
                                x:Name="txtMessage"
                                DockPanel.Dock="Top"/>
                     <Grid Grid.Row="1" Margin="0,20,0,5" DockPanel.Dock="Bottom">
