@@ -9,11 +9,17 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
+    <Compile Update="AddApiKey.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="CustomMessageBox.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Update="AddApiKey.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="CustomMessageBox.xaml">
       <SubType>Designer</SubType>
     </Page>

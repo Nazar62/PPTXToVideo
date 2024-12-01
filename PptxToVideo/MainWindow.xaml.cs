@@ -4,6 +4,8 @@ using Microsoft.Win32;
 using NAudio.Wave;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PptxToVideo.Repository.Repository;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Net.Http;
 using System.Reflection.Metadata.Ecma335;
@@ -29,16 +31,19 @@ namespace PptxToVideo
         string programPath = Directory.GetCurrentDirectory();
         Voice selectedVoice;
         int slidesCount;
-        int txtsCount;
         List<string> slidesText = new List<string>();
         Settings appSettings;
         private const int CHUNK_SIZE = 1024;
         private static string XI_API_KEY;
+        private static ElevenLabsRepository _elevenLabsRepository;
+        private static PowerPointRepository _powerPointRepository;
         public MainWindow()
         {
             InitializeComponent();
             DataContext = this;
 
+            _elevenLabsRepository = new ElevenLabsRepository();
+            _powerPointRepository = new PowerPointRepository();
 
             if (File.Exists($"{programPath}/settings.json"))
             {
@@ -46,86 +51,7 @@ namespace PptxToVideo
             }
         }
 
-        public List<Voice> voices = new List<Voice>();
-
-        private List<string> GetTextFromPressentation(string path)
-        {
-            Application pptApplication = new Application();
-            Presentation pptPresentation = pptApplication.Presentations.Open(filePath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-
-            List<string> PresTexts = new List<string>();
-            foreach (Slide slide in pptPresentation.Slides)
-            {
-                string text = "";
-                foreach (Shape shape in slide.Shapes)
-                {
-                    if (shape.HasTextFrame == MsoTriState.msoTrue)
-                    {
-                        if (shape.TextFrame.HasText == MsoTriState.msoTrue)
-                        {
-                            var textRange = shape.TextFrame.TextRange;
-                            text += textRange.Text + ".\n"; // Or update a control on your form
-                        }
-                    }
-                }
-                //MessageBox.Show(text);
-                PresTexts.Add(text);
-            }
-
-            slidesCount = PresTexts.Count;
-            slidesText = PresTexts;
-            //WriteTextToFiles(PresTexts, $"{programPath}/{ProjectName}/txt/");
-
-            pptPresentation.Close();
-            pptApplication.Quit();
-            return PresTexts;
-        }
-        private async void GetVoices()
-        {
-            //string apiKey = "YOUR_API_KEY"; // Replace with your actual API key
-            string url = "https://api.elevenlabs.io/v1/voices";
-
-            using (var client = new HttpClient())
-            {
-                //client.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
-
-                var response = await client.GetAsync(url);
-                if (response.IsSuccessStatusCode)
-                {
-                    var content = await response.Content.ReadAsStringAsync();
-                    var voicesData = JObject.Parse(content);
-
-                    var voicesD = new List<Voice>();
-
-                    foreach (var voice in voicesData["voices"])
-                    {
-                        voicesD.Add(new Voice()
-                        {
-                            voice_id = voice["voice_id"].ToString(),
-                            name = voice["name"].ToString()
-                        });
-                    }
-
-                    voices = voicesD.OrderBy(x => x.name).ToList();
-
-                    comboBoxVoices.ItemsSource = voices;
-                    comboBoxVoices.DisplayMemberPath = "name";
-
-                    comboBoxVoices.SelectedIndex = 0;
-
-                    if (appSettings != null)
-                    {
-                        if (voices.Any(x => x.name == appSettings.SelectedVoice.name))
-                        {
-                            var voice = voices.Where(x => x.name == appSettings.SelectedVoice.name).FirstOrDefault();
-                            var voiceIndex = voices.IndexOf(voice);
-                            comboBoxVoices.SelectedIndex = voiceIndex;
-                            //comboBoxVoices.SelectedItem = appSettings.SelectedVoice;
-                        }
-                    }
-                }
-            }
-        }
+        public ObservableCollection<string> apiKeys = new ObservableCollection<string>();
 
         private void CloseBtn_MouseEnter(object sender, MouseEventArgs e)
         {
@@ -209,6 +135,8 @@ namespace PptxToVideo
             fileDialog.Filter = "PowerPoint files (*.pptx)|*.pptx";
             fileDialog.ShowDialog();
             string path = fileDialog.FileName;
+            if (path != "")
+            {
                 FileInfo fileInfo = new FileInfo(path);
                 string fileName = fileInfo.Name;
                 filePath = path;
@@ -221,15 +149,16 @@ namespace PptxToVideo
                 FileData.Text = fileData;
                 DropLabel.Visibility = Visibility.Hidden;
                 DragRectangle.Visibility = Visibility.Hidden;
-            progressBar.Visibility = Visibility.Visible;
-            progressLabel.Visibility = Visibility.Visible;
-            progressBar.Value = 0;
-            ProjectName = System.IO.Path.GetFileNameWithoutExtension(filePath);
+                progressBar.Visibility = Visibility.Visible;
+                progressLabel.Visibility = Visibility.Visible;
+                progressBar.Value = 0;
+                ProjectName = System.IO.Path.GetFileNameWithoutExtension(filePath);
 
                 if (!Directory.Exists($"{programPath}/{ProjectName}/"))
                 {
                     Directory.CreateDirectory($"{programPath}/{ProjectName}/");
                 }
+            }
         }
 
         static string GetFileOwner(string path)
@@ -245,16 +174,18 @@ namespace PptxToVideo
             if (filePath == null)
             {
                 new CustomMessageBox("No File selected! Please drag and drop file to Drag and Drop arrea in programm", "No file").ShowDialog();
-            } else if(textBoxElevenLabsAPIKey.Text.Trim() == "")
+            } else if(comboBoxApiKeys.Text.Trim() == "")
             {
                 new CustomMessageBox("Api key is null or whitespace", "Api key not correct").ShowDialog();
-            } else if (!(IsApiKeyCorrect(XI_API_KEY).Result))
+            } else if (!(_elevenLabsRepository.IsApiKeyCorrect(XI_API_KEY).Result))
             {
                 new CustomMessageBox("Api key is uncorrect", "Api key not correct").ShowDialog();
             } else
             {
                 progressLabel.Content = "Getting Text For Voice-Over";
-                var texts = GetTextFromPressentation(filePath);
+                var texts = _powerPointRepository.GetTextFromPressentation(filePath);
+                slidesCount = texts.Count;
+                slidesText = texts;
                 progressBar.Value = 20;
                 //WriteTextToFiles(texts, $"{programPath}/{ProjectName}/txt/");
 
@@ -271,6 +202,7 @@ namespace PptxToVideo
                 else
                 {
                     ContinueConvert();
+                    progressBar.Value += 20;
                 }
             }
         }
@@ -296,17 +228,40 @@ namespace PptxToVideo
             }
         }
 
-        private void Window_Loaded(object sender, RoutedEventArgs e)
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                GetVoices();
-                textBoxElevenLabsAPIKey.Text = appSettings.ElevenLabsAPIKey;
-            }
-            catch
-            {
+            //try
+            //{
+            var voices = await _elevenLabsRepository.GetVoices();
+            comboBoxVoices.ItemsSource = voices;
+            comboBoxVoices.DisplayMemberPath = "name";
 
+            comboBoxVoices.SelectedIndex = 0;
+
+            if (appSettings != null)
+            {
+                if (voices.Any(x => x.name == appSettings.SelectedVoice.name))
+                {
+                    var voice = voices.Where(x => x.name == appSettings.SelectedVoice.name).FirstOrDefault();
+                    var voiceIndex = voices.IndexOf(voice);
+                    comboBoxVoices.SelectedIndex = voiceIndex;
+                    //comboBoxVoices.SelectedItem = appSettings.SelectedVoice;
+                }
             }
+            if (appSettings != null)
+                {
+                    comboBoxApiKeys.SelectedItem = appSettings.RecentElevenLabsApiKey;
+                    apiKeys = appSettings.ElevenLabsApiKeys;
+            } else
+                {
+                    apiKeys.Add("Add ApiKey");
+                }
+                comboBoxApiKeys.ItemsSource = apiKeys;
+            //}
+            //catch
+            //{
+
+            //}
         }
 
         private void comboBoxVoices_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -328,33 +283,45 @@ namespace PptxToVideo
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            if (comboBoxApiKeys.SelectedItem == null)
+            {
+                return;
+            }
+            string apiKey = comboBoxApiKeys.SelectedItem.ToString().ToString();
             Settings settings = new Settings()
             {
-                ElevenLabsAPIKey = textBoxElevenLabsAPIKey.Text,
+                RecentElevenLabsApiKey = apiKey,
                 SelectedVoice = selectedVoice
             };
+
+            if (settings.ElevenLabsApiKeys.Count == 0)
+            {
+                settings.ElevenLabsApiKeys.Add(apiKey);
+            }
+
+            if(settings.ElevenLabsApiKeys != apiKeys)
+            {
+                settings.ElevenLabsApiKeys = apiKeys;
+            }
 
             var json = JsonConvert.SerializeObject(settings);
             File.WriteAllText($"{programPath}/settings.json", json);
         }
 
-        private void textBoxElevenLabsAPIKey_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            XI_API_KEY = textBoxElevenLabsAPIKey.Text;
-        }
         private async void ContinueConvert()
         {
             progressLabel.Content = "Converting text to speech";
-            var responce = await TTSAll();
+            var responce = await _elevenLabsRepository.TTSAll(ProjectName, slidesCount, slidesText, selectedVoice.voice_id, XI_API_KEY);
             progressBar.Value += 20;
             if (responce)
             {
                 progressLabel.Content = "Adding Narration";
-                AddNarration($"{programPath}/{ProjectName}/wavs/");
+                string presentationPath = $"{programPath}/{ProjectName}/press.pptx";
+                _powerPointRepository.AddNarration($"{programPath}/{ProjectName}/wavs/", filePath, slidesText, presentationPath);
                 progressBar.Value += 20;
                 progressLabel.Content = "Exporting to MP4";
-                var output = await ExportToMp4($"{programPath}/{ProjectName}/press.mp4");
-                progressBar.Value += 20;
+                var output = await _powerPointRepository.ExportToMp4($"{programPath}/{ProjectName}/press.mp4", presentationPath);
+                progressBar.Value = 120;
                 progressLabel.Content = "Finished";
                 var result = new CustomMessageBox("Finished! \nWant to open in explorer?", "Question", CustomMessageBox.MessageButtons.YesNo).ShowDialog();
                 if (result.Value == true)
@@ -367,173 +334,83 @@ namespace PptxToVideo
             }
         }
 
-        async Task<bool> IsApiKeyCorrect(string apiKey)
-        {
-            // Construct the URL for the Text-to-Speech API request
-            string ttsUrl = $"https://api.elevenlabs.io/v1/user";
-
-            // Set up headers for the API request, including the API key for authentication
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("xi-api-key", apiKey);
-
-            var response = client.GetAsync(ttsUrl).Result;
-
-            // Check if the request was successful
-            if (response.IsSuccessStatusCode)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
-        }
-
         #region Narration
-        private void AddNarration(string wavFolderPath)
+
+
+        #endregion
+
+        private void comboBoxApiKeys_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string presentationPath = $"{programPath}/{ProjectName}/press.pptx";
-
-            if (File.Exists(presentationPath))
+            if(comboBoxApiKeys.SelectedItem != null)
             {
-                File.Delete(presentationPath);
-            }
-
-            File.Copy(filePath, presentationPath);
-
-            Application application = new Application();
-            Presentation presentation = application.Presentations.Open(presentationPath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-
-            for (int i = 0; i < presentation.Slides.Count; i++)
-            {
-                if (slidesText[i].Trim() != string.Empty)
+                if (comboBoxApiKeys.SelectedItem.ToString() != "Add ApiKey")
                 {
-                    Slide slide = presentation.Slides[i + 1];
-                    Shapes shapes = slide.Shapes;
-                    string wavFilePath = wavFolderPath.Replace('/', '\\') + $"{i}.mp3";
-                    var audioShape = slide.Shapes.AddMediaObject2(wavFilePath);
-                    audioShape.Left = -100; // Set the left position
-                    audioShape.Top = -100; // Set the top position
-                    audioShape.Width = 1; // Set the width
-                    audioShape.Height = 1; // Set the height
-                    audioShape.AnimationSettings.PlaySettings.PlayOnEntry = MsoTriState.msoTrue;
+                    XI_API_KEY = comboBoxApiKeys.SelectedItem.ToString(); ;
+                }
+                else
+                {
+                    var newApiKey = new AddApiKey();
+                    var dialogResult = newApiKey.ShowDialog();
 
-                    //Shape narrationShape = shapes.AddMediaObject2(wavFilePath, MsoTriState.msoFalse, MsoTriState.msoTrue, 0, 0);
-                    //// Set the playback settings for the audio
-                    //narrationShape.AnimationSettings.PlaySettings.PlayOnEntry = MsoTriState.msoTrue;
-                    //narrationShape.AnimationSettings.PlaySettings.HideWhileNotPlaying = MsoTriState.msoTrue;
-
-                    ////set durration
-                    //AudioFileReader wf = new AudioFileReader(wavFilePath);
-                    //var wavDuration = (long)wf.TotalTime.TotalSeconds;
-                    //slide.SlideShowTransition.AdvanceOnTime = MsoTriState.msoTrue;
-                    //slide.SlideShowTransition.AdvanceTime = wavDuration;
+                    if (dialogResult.Value == true)
+                    {
+                        if (apiKeys.Contains(newApiKey.ApiKey))
+                        {
+                            new CustomMessageBox("This API key is already in use");
+                        }
+                        if (_elevenLabsRepository.IsApiKeyCorrect(newApiKey.ApiKey).Result)
+                        {
+                            apiKeys.Add(newApiKey.ApiKey);
+                            comboBoxApiKeys.SelectedIndex = 0;
+                            apiKeys.Remove("Add ApiKey");
+                            apiKeys.Add("Add ApiKey");
+                        }
+                        else
+                        {
+                            new CustomMessageBox("This API key is incorrect and can't be used for TTS", "Incorrect API key").ShowDialog();
+                        }
+                    }
+                    comboBoxApiKeys.SelectedIndex = 0;
                 }
             }
-            presentation.Save();
-            presentation.Close();
-            application.Quit();
         }
 
-        private async Task<bool> ExportToMp4(string outputPath)
+        private void MenuItemDelete_Click(object sender, RoutedEventArgs e)
         {
-            try
+            var menuItem = sender as MenuItem;
+            if (menuItem != null)
             {
-                string presentationPath = $"{programPath}/{ProjectName}/press.pptx";
-                Application application = new Application();
-                Presentation pptPresentation = application.Presentations.Open(presentationPath, MsoTriState.msoFalse, MsoTriState.msoFalse, MsoTriState.msoFalse);
-                pptPresentation.SaveAs(outputPath, PpSaveAsFileType.ppSaveAsMP4, MsoTriState.msoCTrue);
-                return true;
-            } catch(Exception ex)
-            {
-                new CustomMessageBox($"Error export. {ex}").ShowDialog();
-                return false;
-            }
-        }
-
-        #region TTS
-        private async Task<bool> TTSAll()
-        {
-            if (!Directory.Exists($"{programPath}/{ProjectName}/wavs/"))
-            {
-                Directory.CreateDirectory($"{programPath}/{ProjectName}/wavs/");
-            }
-            for (int i = 0; i < slidesCount; i++)
-            {
-                if (slidesText[i].Trim() != string.Empty)
+                var contextMenu = menuItem.Parent as ContextMenu;
+                if (contextMenu != null)
                 {
-                    var responce = await TTS(slidesText[i], $"{programPath}/{ProjectName}/wavs/{i}.mp3");
-                    if(responce == false)
+                    var textBlock = contextMenu.PlacementTarget as TextBlock;
+                    if (textBlock != null)
                     {
-                        return false;
-                        break;
+                        string itemToRemove = textBlock.Text;
+                        apiKeys.Remove(itemToRemove);
                     }
                 }
             }
-            return true;
+            comboBoxApiKeys.SelectedIndex = 0;
         }
 
-        async Task<bool> TTS(string text, string outputPath)
+        private async void MenuItemCheck_Click(object sender, RoutedEventArgs e)
         {
-            // Construct the URL for the Text-to-Speech API request
-            string ttsUrl = $"https://api.elevenlabs.io/v1/text-to-speech/{selectedVoice.voice_id}/stream";
-
-            // Set up headers for the API request, including the API key for authentication
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("xi-api-key", XI_API_KEY);
-
-            // Set up the data payload for the API request, including the text and voice settings
-            var data = new
+            var menuItem = sender as MenuItem;
+            if (menuItem != null)
             {
-                text = text,
-                model_id = "eleven_multilingual_v2",
-                voice_settings = new
+                var contextMenu = menuItem.Parent as ContextMenu;
+                if (contextMenu != null)
                 {
-                    stability = 0.5,
-                    similarity_boost = 0.8,
-                    style = 0.0,
-                    use_speaker_boost = true
-                }
-            };
-
-            var json = JsonConvert.SerializeObject(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-            // Make the POST request to the TTS API with headers and data, enabling streaming response
-            var response = await client.PostAsync(ttsUrl, content);
-
-            // Check if the request was successful
-            if (response.IsSuccessStatusCode)
-            {
-                // Read the response in chunks and write to the file
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    byte[] buffer = new byte[CHUNK_SIZE];
-                    int read;
-                    while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                    var textBlock = contextMenu.PlacementTarget as TextBlock;
+                    if (textBlock != null)
                     {
-                        fileStream.Write(buffer, 0, read);
+                        var apiKey = textBlock.Text;
+                        var j = await _elevenLabsRepository.GetCharterStats(apiKey);
+                        new CustomMessageBox($"Charters this key have: {j}", "Charters").ShowDialog();
                     }
                 }
-                return true;
-                // Inform the user of success
-                //Console.WriteLine("Audio stream saved successfully.");
             }
-            else
-            {
-                // Print the error message if the request was not successful
-                new CustomMessageBox(await response.Content.ReadAsStringAsync()).ShowDialog();
-                return false;
-            }
-            //Task.Delay(1000);
         }
-
-        #endregion
-        #endregion
     }
 }

@@ -88,83 +88,83 @@ namespace SpirePptxToVideo
         }
 
         #region TTS
-        private async Task TTSAll()
-        {
-            if(!Directory.Exists($"{programPath}/{ProjectName}/wavs/"))
-            {
-                Directory.CreateDirectory($"{programPath}/{ProjectName}/wavs/");
-            }
-            for(int i = 0; i < slidesCount; i++)
-            {
-                if (slidesText[i].Trim() != string.Empty)
-                {
-                    await TTS(slidesText[i], $"{programPath}/{ProjectName}/wavs/{i}.mp3");
-                }
-            }
-        }
+        //private async Task TTSAll()
+        //{
+        //    if(!Directory.Exists($"{programPath}/{ProjectName}/wavs/"))
+        //    {
+        //        Directory.CreateDirectory($"{programPath}/{ProjectName}/wavs/");
+        //    }
+        //    for(int i = 0; i < slidesCount; i++)
+        //    {
+        //        if (slidesText[i].Trim() != string.Empty)
+        //        {
+        //            await TTS(slidesText[i], $"{programPath}/{ProjectName}/wavs/{i}.mp3");
+        //        }
+        //    }
+        //}
 
-        async Task TTS(string text, string outputPath)
-        {
-            // Construct the URL for the Text-to-Speech API request
-            string ttsUrl = $"https://api.elevenlabs.io/v1/text-to-speech/{selectedVoice.voice_id}/stream";
+        //async Task TTS(string text, string outputPath)
+        //{
+        //    // Construct the URL for the Text-to-Speech API request
+        //    string ttsUrl = $"https://api.elevenlabs.io/v1/text-to-speech/{selectedVoice.voice_id}/stream";
 
-            // Set up headers for the API request, including the API key for authentication
-            var client = new HttpClient();
-            client.DefaultRequestHeaders.Accept.Clear();
-            client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
-            client.DefaultRequestHeaders.Add("xi-api-key", XI_API_KEY);
+        //    // Set up headers for the API request, including the API key for authentication
+        //    var client = new HttpClient();
+        //    client.DefaultRequestHeaders.Accept.Clear();
+        //    client.DefaultRequestHeaders.Accept.Add(new System.Net.Http.Headers.MediaTypeWithQualityHeaderValue("application/json"));
+        //    client.DefaultRequestHeaders.Add("xi-api-key", XI_API_KEY);
 
-            // Set up the data payload for the API request, including the text and voice settings
-            var data = new
-            {
-                text = text,
-                model_id = "eleven_multilingual_v2",
-                voice_settings = new
-                {
-                    stability = 0.5,
-                    similarity_boost = 0.8,
-                    style = 0.0,
-                    use_speaker_boost = true
-                }
-            };
+        //    // Set up the data payload for the API request, including the text and voice settings
+        //    var data = new
+        //    {
+        //        text = text,
+        //        model_id = "eleven_multilingual_v2",
+        //        voice_settings = new
+        //        {
+        //            stability = 0.5,
+        //            similarity_boost = 0.8,
+        //            style = 0.0,
+        //            use_speaker_boost = true
+        //        }
+        //    };
 
-            var json = JsonConvert.SerializeObject(data);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+        //    var json = JsonConvert.SerializeObject(data);
+        //    var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            // Make the POST request to the TTS API with headers and data, enabling streaming response
-            var response = await client.PostAsync(ttsUrl, content);
+        //    // Make the POST request to the TTS API with headers and data, enabling streaming response
+        //    var response = await client.PostAsync(ttsUrl, content);
 
-            // Check if the request was successful
-            if (response.IsSuccessStatusCode)
-            {
-                // Read the response in chunks and write to the file
-                using (var stream = await response.Content.ReadAsStreamAsync())
-                using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
-                {
-                    byte[] buffer = new byte[CHUNK_SIZE];
-                    int read;
-                    while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
-                    {
-                        fileStream.Write(buffer, 0, read);
-                    }
-                }
-                // Inform the user of success
-                //Console.WriteLine("Audio stream saved successfully.");
-            }
-            else
-            {
-                // Print the error message if the request was not successful
-                MessageBox.Show(await response.Content.ReadAsStringAsync());
-            }
-            //Task.Delay(1000);
-        }
+        //    // Check if the request was successful
+        //    if (response.IsSuccessStatusCode)
+        //    {
+        //        // Read the response in chunks and write to the file
+        //        using (var stream = await response.Content.ReadAsStreamAsync())
+        //        using (var fileStream = new FileStream(outputPath, FileMode.Create, FileAccess.Write))
+        //        {
+        //            byte[] buffer = new byte[CHUNK_SIZE];
+        //            int read;
+        //            while ((read = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+        //            {
+        //                fileStream.Write(buffer, 0, read);
+        //            }
+        //        }
+        //        // Inform the user of success
+        //        //Console.WriteLine("Audio stream saved successfully.");
+        //    }
+        //    else
+        //    {
+        //        // Print the error message if the request was not successful
+        //        MessageBox.Show(await response.Content.ReadAsStringAsync());
+        //    }
+        //    //Task.Delay(1000);
+        //}
 
         #endregion
         #endregion
 
         private async void ContinueConvert()
         {
-            await TTSAll();
+            //await TTSAll();
             MessageBox.Show("All slides narrated");
             AddNarration($"{programPath}/{ProjectName}/wavs/");
             ExportToMp4($"{programPath}/{ProjectName}/press.mp4");

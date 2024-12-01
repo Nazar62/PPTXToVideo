@@ -25,7 +25,6 @@ D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\MaterialDesignC
 D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\MaterialDesignThemes.Wpf.dll
 D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\Microsoft.Xaml.Behaviors.dll
 D:\vs\projects\PressToVideo\PptxToVideo\obj\Debug\net8.0-windows\PptxToVideo.csproj.CopyComplete
-D:\vs\projects\PressToVideo\PptxToVideo\obj\Debug\net8.0-windows\GeneratedInternalTypeHelper.g.cs
 D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\Microsoft.Office.Interop.PowerPoint.dll
 D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\Newtonsoft.Json.dll
 D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\office.dll
@@ -38,3 +37,5 @@ D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\NAudio.WinForms
 D:\vs\projects\PressToVideo\PptxToVideo\bin\Debug\net8.0-windows\NAudio.WinMM.dll
 D:\vs\projects\PressToVideo\PptxToVideo\obj\Debug\net8.0-windows\CustomMessageBox.g.cs
 D:\vs\projects\PressToVideo\PptxToVideo\obj\Debug\net8.0-windows\CustomMessageBox.baml
+D:\vs\projects\PressToVideo\PptxToVideo\obj\Debug\net8.0-windows\AddApiKey.g.cs
+D:\vs\projects\PressToVideo\PptxToVideo\obj\Debug\net8.0-windows\AddApiKey.baml
