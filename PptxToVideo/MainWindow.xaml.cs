@@ -49,7 +49,7 @@ namespace PptxToVideo
             {
                 appSettings = JsonConvert.DeserializeObject<Settings>(File.ReadAllText($"{programPath}/settings.json"));
             }
-        }
+        } 
 
         public ObservableCollection<string> apiKeys = new ObservableCollection<string>();
 
@@ -81,7 +81,7 @@ namespace PptxToVideo
                     App.Current.MainWindow.DragMove();
                 }
             }
-        }
+        } 
         private void AdjustWindowSize()
         {
             if (this.WindowState == WindowState.Maximized)
@@ -96,7 +96,7 @@ namespace PptxToVideo
 
         private void DragRectangle_Drop(object sender, DragEventArgs e)
         {
-            if(e.Data.GetDataPresent(DataFormats.FileDrop))
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
                 string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
                 if (Path.GetExtension(files[0]) == ".pptx")
@@ -107,7 +107,7 @@ namespace PptxToVideo
                     string fileData = $"File Name: {fileInfo.Name.Split('.')[0]} \n" +
                     $"Size (bytes): {fileInfo.Length} \n" +
                     $"Created: {fileInfo.CreationTime} \n" +
-                    $"Last Edited: {fileInfo.LastWriteTime}  \n"+
+                    $"Last Edited: {fileInfo.LastWriteTime}  \n" +
                     $"Owner: {GetFileOwner(files[0]).Split('\\')[1]}";
 
                     FileData.Text = fileData;
@@ -122,13 +122,14 @@ namespace PptxToVideo
                     {
                         Directory.CreateDirectory($"{programPath}/{ProjectName}/");
                     }
-                } else
+                }
+                else
                 {
                     new CustomMessageBox("Drop pptx presentation").ShowDialog();
                 }
             }
-        }
 
+        }
         private void DragRectangle_MouseUp(object sender, MouseButtonEventArgs e)
         {
             OpenFileDialog fileDialog = new OpenFileDialog();
@@ -159,7 +160,7 @@ namespace PptxToVideo
                     Directory.CreateDirectory($"{programPath}/{ProjectName}/");
                 }
             }
-        }
+        } 
 
         static string GetFileOwner(string path)
         {
@@ -230,8 +231,6 @@ namespace PptxToVideo
 
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //try
-            //{
             var voices = await _elevenLabsRepository.GetVoices();
             comboBoxVoices.ItemsSource = voices;
             comboBoxVoices.DisplayMemberPath = "name";
@@ -245,7 +244,6 @@ namespace PptxToVideo
                     var voice = voices.Where(x => x.name == appSettings.SelectedVoice.name).FirstOrDefault();
                     var voiceIndex = voices.IndexOf(voice);
                     comboBoxVoices.SelectedIndex = voiceIndex;
-                    //comboBoxVoices.SelectedItem = appSettings.SelectedVoice;
                 }
             }
             if (appSettings != null)
@@ -257,17 +255,12 @@ namespace PptxToVideo
                     apiKeys.Add("Add ApiKey");
                 }
                 comboBoxApiKeys.ItemsSource = apiKeys;
-            //}
-            //catch
-            //{
-
-            //}
-        }
+        } 
 
         private void comboBoxVoices_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             selectedVoice = comboBoxVoices.SelectedItem as Voice;
-        }
+        } 
 
         private void buttonNext_Click(object sender, RoutedEventArgs e)
         {
@@ -334,10 +327,6 @@ namespace PptxToVideo
             }
         }
 
-        #region Narration
-
-
-        #endregion
 
         private void comboBoxApiKeys_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

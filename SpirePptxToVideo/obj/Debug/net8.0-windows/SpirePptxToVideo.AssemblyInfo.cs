@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SpirePptxToVideo")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8516fe44d886e6e583cef31a8b1cd44ea96cb57e")]
 [assembly: System.Reflection.AssemblyProductAttribute("SpirePptxToVideo")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SpirePptxToVideo")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

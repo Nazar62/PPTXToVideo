@@ -30,17 +30,12 @@ namespace PptxToVideo.Repository.Repository
                         if (shape.TextFrame.HasText == MsoTriState.msoTrue)
                         {
                             var textRange = shape.TextFrame.TextRange;
-                            text += textRange.Text + ".\n"; // Or update a control on your form
+                            text += textRange.Text + ".\n"; 
                         }
                     }
                 }
-                //MessageBox.Show(text);
                 PresTexts.Add(text);
             }
-
-            //slidesCount = PresTexts.Count;
-            //slidesText = PresTexts;
-            //WriteTextToFiles(PresTexts, $"{programPath}/{ProjectName}/txt/");
 
             pptPresentation.Close();
             pptApplication.Quit();
@@ -74,16 +69,6 @@ namespace PptxToVideo.Repository.Repository
                     audioShape.Height = 1;
                     audioShape.AnimationSettings.PlaySettings.PlayOnEntry = MsoTriState.msoTrue;
 
-                    //Shape narrationShape = shapes.AddMediaObject2(wavFilePath, MsoTriState.msoFalse, MsoTriState.msoTrue, 0, 0);
-                    //// Set the playback settings for the audio
-                    //narrationShape.AnimationSettings.PlaySettings.PlayOnEntry = MsoTriState.msoTrue;
-                    //narrationShape.AnimationSettings.PlaySettings.HideWhileNotPlaying = MsoTriState.msoTrue;
-
-                    ////set durration
-                    //AudioFileReader wf = new AudioFileReader(wavFilePath);
-                    //var wavDuration = (long)wf.TotalTime.TotalSeconds;
-                    //slide.SlideShowTransition.AdvanceOnTime = MsoTriState.msoTrue;
-                    //slide.SlideShowTransition.AdvanceTime = wavDuration;
                 }
             }
             presentation.Save();
@@ -96,25 +81,32 @@ namespace PptxToVideo.Repository.Repository
             try
             {
                 Application application = new Application();
+                application.PresentationCloseFinal += Application_PresentationCloseFinal;
                 Presentation pptPresentation = application.Presentations.Open(presentationPath, MsoTriState.msoFalse, MsoTriState.msoFalse);
                 pptPresentation.SaveAs(outputPath, PpSaveAsFileType.ppSaveAsMP4, MsoTriState.msoCTrue);
-                try
-                {
-                    while (application.Presentations.Count > 0)
-                    {
-                        System.Threading.Thread.Sleep(1000);
-                    }
-                }
-                catch
-                {
 
+                bool isExportComplete = false; 
+                while (!isExportComplete)
+                {
+                    Thread.Sleep(1000);
+                    if (File.Exists(outputPath) && pptPresentation.CreateVideoStatus == PpMediaTaskStatus.ppMediaTaskStatusDone) isExportComplete = true;
                 }
-                if (pptPresentation.Saved == MsoTriState.msoTrue) return true; else return false;
+                var res = false;
+                if (pptPresentation.Saved == MsoTriState.msoTrue) res = true; else res = false;
+                pptPresentation.Save();
+                pptPresentation.Close();
+                application.Quit();
+                return res;
             }
             catch
             {
                 return false;
             }
+        }
+
+        private void Application_PresentationCloseFinal(Presentation Pres)
+        {
+            Pres.Close();
         }
     }
 }

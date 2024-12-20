@@ -4,6 +4,7 @@ using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
+using System.Text.Json.Nodes;
 
 namespace PptxToVideo.Repository.Repository
 {
@@ -79,7 +80,9 @@ namespace PptxToVideo.Repository.Repository
             }
             else
             {
-                new CustomMessageBox(await response.Content.ReadAsStringAsync()).ShowDialog();
+                JsonObject responseJson = JsonObject.Parse(await response.Content.ReadAsStringAsync()).AsObject();
+                //new CustomMessageBox(await response.Content.ReadAsStringAsync()).ShowDialog();
+                new CustomMessageBox(responseJson["detail"]["message"].ToString(), responseJson["detail"]["status"].ToString()).ShowDialog();
                 return false;
             }
             //Task.Delay(1000);
